@@ -24,60 +24,6 @@ API exposes these details:
 - Product code: TW105SEUP06
 
 
-Firmware info
--------------
-Firmware can be upgraded over the network. I have actually used strings from the firmware to find secret keys, encryption algorithms and some API calls that I haven't seen on the network. It consists of two files. First image format is according to https://github.com/espressif/esptool in version: 1.
-
-I have seen these two versions only so this page describes its behaviour:
-
-- 1.99.20
-- 1.99.24
-- 2.0.22-mqtt
-- 2.1.0
-
-
-Device name
------------
-
-Device name is used to announce SSID if it operates in AP mode, or to select device in the application. By default consists of prefix **Twinkly_** and uppercased unique identifier derived from MAC address. It can be read or changed by API.
-
-
-Modes of network operation
---------------------------
-
-Hardware works in two network modes:
-
-- Access Point (AP)
-- Station (STA)
-
-AP mode is default - after factory reset. Broadcasts SSID made from `device name`_. Server uses static IP address 192.168.4.1 and operates in network 192.168.4.0/24. Provides DHCP server for any device it joins the network.
-
-To switch to STA mode hardware needs to be configured with SSID network to connect to and encrypted password. Rest is simple API call through TCP port 80 (HTTP).
-
-Switch from STA mode back to AP mode is as easy as another API call.
-
-http://41j.com/blog/2015/01/esp8266-access-mode-notes/
-
-
-WiFi password encryption
-------------------------
-
-1. Generate encryption key
-
-   1. Use secret key: **supersecretkey!!**
-   2. get byte representation of MAC adress of a server and repeat it to length of the secret key
-   3. xor these two values
-
-2. Encrypt
-
-   1. Use password to access WiFi and pad it with zero bytes to length 64 bytes.
-   2. Use rc4 to encrypt padded password with the *encryption key*
-
-3. Encode
-
-   Base64 encode encrypted string.
-
-
 Typical Device Handshake
 ------------------------
 1. UDP Broadcast Discovery
@@ -322,6 +268,15 @@ Example Response:
 	"code": 1000
 }
 
+Firmware info
+I have seen these two versions only so this page describes its behaviour:
+
+- 1.99.20
+- 1.99.24
+- 2.0.22-mqtt
+- 2.1.0
+
+
 
 7 http ?POST? update firmware
 ---------
@@ -333,6 +288,8 @@ Update sequence follows:
 3. application sends second file to endpoint 1 over HTTP
 4. server returns sha1sum of received file
 5. application calls update API with sha1sum of each stages.
+
+Firmware can be upgraded over the network. I have actually used strings from the firmware to find secret keys, encryption algorithms and some API calls that I haven't seen on the network. It consists of two files. First image format is according to https://github.com/espressif/esptool in version: 1.
 
 
 8 LED effect operating modes
@@ -412,7 +369,7 @@ Movie file format is simple sequence of bytes. Three bytes in a row represent in
 3. if no UDP packet is sent, after 60 seconds rt time out, and the device will revert to mode movie.
 
 
-Real time LED UDP packet format
+9 Real time LED UDP packet format
 -------------------------------
 
 Before packets are sent to a device application needs to login and verify authentication token. See above.
@@ -427,6 +384,46 @@ Then follows body of the frame similarly to movie file format - three bytes for 
 
 For my 105 LED each packet is 325 bytes long.
 
+Device name
+-----------
+
+Device name is used to announce SSID if it operates in AP mode, or to select device in the application. By default consists of prefix **Twinkly_** and uppercased unique identifier derived from MAC address. It can be read or changed by API.
+
+
+Modes of network operation
+--------------------------
+
+Hardware works in two network modes:
+
+- Access Point (AP)
+- Station (STA)
+
+AP mode is default - after factory reset. Broadcasts SSID made from `device name`_. Server uses static IP address 192.168.4.1 and operates in network 192.168.4.0/24. Provides DHCP server for any device it joins the network.
+
+To switch to STA mode hardware needs to be configured with SSID network to connect to and encrypted password. Rest is simple API call through TCP port 80 (HTTP).
+
+Switch from STA mode back to AP mode is as easy as another API call.
+
+http://41j.com/blog/2015/01/esp8266-access-mode-notes/
+
+
+WiFi password encryption
+------------------------
+
+1. Generate encryption key
+
+   1. Use secret key: **supersecretkey!!**
+   2. get byte representation of MAC adress of a server and repeat it to length of the secret key
+   3. xor these two values
+
+2. Encrypt
+
+   1. Use password to access WiFi and pad it with zero bytes to length 64 bytes.
+   2. Use rc4 to encrypt padded password with the *encryption key*
+
+3. Encode
+
+   Base64 encode encrypted string.
 
 Scan for WiFi networks
 ----------------------
@@ -440,6 +437,7 @@ Hardware can be used to scan for available WiFi networks and return some informa
 1. Call network scan API
 2. Wait a little bit
 3. Call network results API
+
 
 
 On Error
