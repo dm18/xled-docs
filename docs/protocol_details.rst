@@ -87,8 +87,7 @@ Typical Device Handshake
 6. http GET version
 8. http POST mode
 
-
-9a UDP real time mode
+9. UDP real time mode
 ---------
 
 Discovery of Twinkly devices on the local network subnet.
