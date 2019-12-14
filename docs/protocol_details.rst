@@ -88,8 +88,11 @@ Typical Device Handshake
 8. http POST mode
 
 9. UDP real time mode
----------
 
+
+
+1 UDP Broadcast Discovery
+---------
 Discovery of Twinkly devices on the local network subnet.
 
 1. Application sends UDP broadcast to port 5555 with message **\\x01discover** (first character is byte with hex representation 0x01).
@@ -116,6 +119,8 @@ Example Response BreakDown:
 74 (OK)
 77696e6b6c795f423131313131 (twinkly_B11111)
 00 (padding)
+
+
 
 2 http GET gestalt (get device info)
 ------------------------------------
