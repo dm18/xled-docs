@@ -45,6 +45,9 @@ After Device Handshake
 8. http POST mode (off, demo, rt, movie)
 9. UDP data stream OR Upload full movie LED effect
 
+On Error
+------------------------
+At anytime the API can return another code other then 1000, if this happens Device Handshake needs to be performed again.
 
 
 1 UDP Broadcast Discovery
@@ -427,7 +430,7 @@ WiFi password encryption
 
 Scan for WiFi networks
 ----------------------
-When you firs setup twinkly, it creates it's own wifi network.
+When you first setup twinkly, it creates it's own wifi network.
 To get it to join your wifi network, you need to connect to twinkly's wifi network, and then tell twinkly the wifi network to join.
 Twinkly's wifi card may not support the same wifi standards are your smartphone. As such, it scans.  
 I assume there is also a command to set the wifi network to join.  
@@ -441,7 +444,7 @@ Hardware can be used to scan for available WiFi networks and return some informa
 
 
 On Error
---------------------------
+---------
 
 At any time,
 Response from POST or GET could change from 1000 to another code.
