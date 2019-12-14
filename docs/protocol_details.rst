@@ -77,6 +77,7 @@ WiFi password encryption
 
    Base64 encode encrypted string.
 
+
 Typical Device Handshake
 ------------------------
 1. UDP Broadcast Discovery
@@ -84,10 +85,15 @@ Typical Device Handshake
 3. http POST login (generate authentication_token) 
 4. http GET verify login
 5. http GET status
-6. http GET version
-8. http POST mode
 
-9. UDP real time mode
+-- Firmware check
+6. http GET firmware version
+7. http update firmware (if firmware is out of date)
+
+After Device Handshake
+------------------------
+8. http POST mode (off, demo, rt, movie)
+9. UDP data stream OR Upload full movie LED effect
 
 
 
@@ -123,7 +129,7 @@ Example Response BreakDown:
 
 
 2 http GET gestalt (get device info)
-------------------------------------
+---------
 Application uses http POST on port 80 to get device info
 
 Example:
@@ -172,13 +178,13 @@ product_code - informs the client of the device product model. The model be be u
 
 
 3 http POST login (generate authentication_token) 
--------------------------------------------------
+---------
 client uses http POST on port 80 to generate authentication_token
 
 Example Send:
 HOST: 192.168.2.11
 Port: 80
-Method: POST
+Method: GET
 URL: /xled/v1/login
 JSON Text:
 {
@@ -203,11 +209,7 @@ Example:
 client A created token 1
 client A verifies token with server, the response is code 1000 (successful)
 client B creates token 2
-token 1 now fails verification 
-
-
-Verification of challenge-response
-----------------------------------
+token 1 now fails verification  & can not be used.
 
 When a client request an authentication_token from the server, the client send a challenge, when the server response back with an authentication_token, the server includes a challenge-response. 
 
@@ -215,12 +217,8 @@ While there is not indication that the server verifies the challenge. In future 
 
 Similarly while there is no indication the client currently verifies the challenge-response. The client could in theory verify the shared secret. In which case, the client might only only attempt to issue commands to servers that respond with the correct secret. 
 
- 
-
 The Server can chose to verify the challenge to determine if it wants to respond to the client.
-The Client can chose to verify the response yo determine if it wants to talk to the server. 
-
-
+The Client can chose to verify the response yo determine if it wants to talk to the server.
 
 1. Generate encryption key
 
@@ -235,8 +233,94 @@ The Client can chose to verify the response yo determine if it wants to talk to 
 4. Compare - hash digest must be same as challenge-response from server
 
 
-Firmware update
----------------
+
+4 Verification of challenge-response
+---------
+
+Example Send:
+HOST: 192.168.2.11
+Port: 80
+Method: GET
+URL: /xled/v1/verify
+Header: X-Auth-Token: vWUWUJYWpYA=
+
+JSON Text:
+{
+}
+
+Example Response:
+{
+	"code": 1000
+} 
+
+1000  = success, other value would be error/failed
+
+
+
+5 http GET status
+---------
+Example Send:
+HOST: 192.168.2.11
+Port: 80
+Method: GET
+URL: /xled/v1/network/status
+Header: X-Auth-Token: vWUWUJYWpYA=
+
+JSON Text:
+{
+}
+
+Example Response:
+{
+	"mode": 1,
+	"station": {
+		"ssid": "Wireless Network Name",
+		"bssid": "MAC ADDRESS",
+		"ip": "Twinklys IP Address",
+		"gw": "Router IP Address",
+		"mask": "Wireless Subnet Mask",
+		"status": 5
+	},
+	"ap": {
+		"ssid": "Device Name",
+		"channel": 1,
+		"ip": "0.0.0.0",
+		"enc": 0
+	},
+	"code": 1000
+}
+
+mode - 0 = mode ap? 1 = station?
+status - might be 
+
+mode 1 / station - seems to be what the device is set to use to connect to a wifi network?
+mode 0 / ap - seems to be what the device would use to create it's own network, if the device is not connected to a network
+
+for mode ap, ssid seems to default to device_name. I haven't tried changing the device name to see if that would change the ssid for ap
+
+
+6 http GET firmware version
+---------
+Example Send:
+HOST: 192.168.2.11
+Port: 80
+Method: POST
+URL: /xled/v1/fw/vertion
+Header: X-Auth-Token: vWUWUJYWpYA=
+
+JSON Text:
+{
+}
+
+Example Response:
+{
+	"version": "firmware version here",
+	"code": 1000
+}
+
+
+7 http ?POST? update firmware
+---------
 
 Update sequence follows:
 
@@ -247,8 +331,25 @@ Update sequence follows:
 5. application calls update API with sha1sum of each stages.
 
 
-LED effect operating modes
---------------------------
+8 LED effect operating modes
+---------
+Example Send:
+HOST: 192.168.2.11
+Port: 80
+Method: POST
+URL: /xled/v1/led/mode
+Header: X-Auth-Token: vWUWUJYWpYA=
+
+JSON Text:
+{
+	"mode": "rt"
+}
+
+Example Response:
+{
+	"code": 1000
+}
+
 
 Hardware can operate in one of following modes:
 
@@ -262,22 +363,24 @@ Mode off
 ----------------------------
 1. Application calls API to switch mode to off
 
+Device will set all LED to value of off. 
 
 Mode demo
 ----------------------------
 1. Application calls HTTP API to switch mode to demo
 
-Device will set all LED to value of off. 
+Device will play built in demo mode.
+Not sure if this is a script doing on onboard version of RT, or if this is a built-in movie effect file.
 
 
 Mode movie
 ----------------------------
 1. Application calls HTTP API to switch mode to demo
 
-Device will play the movie mode currently stored on device. 
+Device will play the api set movie mode file currently stored on device. 
 
 
-Upload full movie LED effect
+9 Upload full movie LED effect
 ----------------------------
 
 1. Application calls HTTP API to switch mode to movie
@@ -296,7 +399,7 @@ LED effect is called **movie**. It consists of **frames**. Each frame defines co
 Movie file format is simple sequence of bytes. Three bytes in a row represent intensity of *red*, *green* and *blue* in this order. Each frame is defined just with number of LEDs times three. Frames don't have any separator. Definition of each frame starts from LED closer to LED driver/adapter.
 
 
-mode rt
+9 mode rt
 (Real time LED operating mode)
 ----------------------------
 
@@ -333,3 +436,11 @@ Hardware can be used to scan for available WiFi networks and return some informa
 1. Call network scan API
 2. Wait a little bit
 3. Call network results API
+
+
+On Error
+--------------------------
+
+At any time,
+Response from POST or GET could change from 1000 to another code.
+At that point API needs to perform Device Handshake to re-establish connection to device.
