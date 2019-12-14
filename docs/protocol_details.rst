@@ -84,9 +84,13 @@ Typical Device Handshake
 2. http GET gestalt (get device info)
 3. http POST login (generate authentication_token) 
 4. http GET verify login
+
+Check if Wireless Router or Client (not required)
+------------------------
 5. http GET status
 
--- Firmware check
+Firmware check / update (not required)
+------------------------
 6. http GET firmware version
 7. http update firmware (if firmware is out of date)
 
