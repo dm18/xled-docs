@@ -43,7 +43,7 @@ Firmware check / update (not required)
 After Device Handshake
 ------------------------
 8. http POST mode (off, demo, rt, movie)
-9. UDP data stream OR Upload full movie LED effect
+9. UDP LED data stream OR Upload full movie LED effect
 
 On Error
 ------------------------
