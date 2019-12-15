@@ -408,14 +408,15 @@ Before UDP packets are sent to a device, application needs a valid X-Auth-Token.
 See above, steps 1 - 4.
 
 And the device 'mode' needs to be set to 'rt'
-See above, steps 8. 
+See above, steps 7, 8. 
 
 Sending a valid UDP packet requires a valid X-Auth-Token decoded from base64 data into binary data.
 
-An example of that would be
+An example of converting the token using shell terminal. 
 echo (X_Auth_Token here) | base64 --decode | od -t x1 | head -1 | cut -c8- | tr -d \"[:blank:]\"
+Base65 --decode converts 64bit into binrary, od -tx1 converts binary into hex one byte at a time. 
 
-example
+example of UDP packet. 
 if the X-Auth-Token was vWUWUJYWpYA=
 The decoded hex value of the token would be bd6516509616a580
 
@@ -423,10 +424,10 @@ UDP packet format is
 (header)(X-Auth-Token)(frame count)(leds values for frame)
 
 Each UDP pack starts with:
-* 1 byte (*\\x01* .byte with hex representation 0x01)
-* 8 bytes (Base 64 decoded of X-Auth-Token into hex)
-* 1 byte (number of LED in frame, I assume always 0 for RT mode, as in 0x00)
-* LED values as a hex. (In the case of RGB that would be rrggbb as in 000000)
+* 1 byte header (*\\x01* .byte with hex representation 0x01)
+* 8 bytes X-Auth-Token (Base 64 decoded of X-Auth-Token into hex)
+* 1 byte frame number (number of frame being sent, I assume always frame is always frame 0 for RT mode, as in 0x00, as in first frame)
+* LED values as a hex. (In the case of RGB that would 3 bytes per LED, aka rrggbb, aka 0x00 0x00 0x00, aka 000000)
 
 Example:
 if the device had a number_of_led = 1
