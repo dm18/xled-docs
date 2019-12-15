@@ -420,7 +420,7 @@ if the X-Auth-Token was vWUWUJYWpYA=
 The decoded hex value of the token would be bd6516509616a580
 
 UDP packet format is
-(header)(X-Auth-Token)(frame count)(led values of frame)
+(header)(X-Auth-Token)(frame count)(leds values for frame)
 
 Each UDP pack starts with:
 * 1 byte (*\\x01* .byte with hex representation 0x01)
