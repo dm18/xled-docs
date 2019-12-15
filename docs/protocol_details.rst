@@ -429,8 +429,8 @@ Each UDP pack starts with:
 * LED values as a hex. (In the case of RGB that would be rrggbb as in 000000)
 
 Example:
-if the device was 1 LED long
-and the LED was set to black , 000000
+if the device had a number_of_led = 1
+and that 1 LED was set to black , 000000
 
 AND the X-Auth-Token is vWUWUJYWpYA=
 The decoded hex value of the token would be bd6516509616a580
@@ -443,6 +443,10 @@ bd6516509616a580 (decoded hex version of X_Auth_Token)
 
 as in a UDP packet sent to the device on port 7777 would be
 01bd6516509616a58000000000
+
+If number_of_led was 2 , and LED were RGB, first LED white, second RBG LED black
+01bd6516509616a5800ffffff000000
+
 
 
 as in every UDP packet from an RGB LED set would be
