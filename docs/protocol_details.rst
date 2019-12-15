@@ -253,6 +253,9 @@ mode 0 / ap - seems to be what the device would use to create it's own network, 
 
 for mode ap, ssid seems to default to device_name. I haven't tried changing the device name to see if that would change the ssid for ap
 
+While a client doesn't have to know what AP mode the device is in. 
+If you were in AP mode, and wanted to make the client join a specific wireless network, being able to check that status would probable be useful.
+
 
 6 http GET firmware version
 ---------
@@ -301,7 +304,24 @@ Firmware can be upgraded over the network. I have actually used strings from the
 8 Device Reset
 ---------
 
-?stops current mode?
+?pauses current mode?
+
+Example Send:
+HOST: 192.168.2.11
+Port: 80
+Method: POST
+URL: /xled/v1/led/reset
+Header: X-Auth-Token: vWUWUJYWpYA=
+
+JSON Text:
+{
+}
+
+Example Response:
+{
+	"code": 1000
+}
+
  
 
 9 LED effect operating modes
@@ -421,9 +441,18 @@ bd6516509616a580 (decoded hex version of X_Auth_Token)
 00 (frame / spacer)
 000000 (LED value)
 
-as in a UDP packet sent tot the device on port 7777 would be
+as in a UDP packet sent to the device on port 7777 would be
 01bd6516509616a58000000000
 
+
+as in every UDP packet from an RGB LED set would be
+10 hex bytes + ( 3 hex bytes * number_of_led )
+
+Similarly, if it was RGBW, then maybe it would be 
+10 hex bytes + ( 4 hex bytes * number_of_led ) 
+?
+
+ 
 Then follows body of the frame similarly to movie file format - three bytes for each LED.
 
 For my 105 LED each packet is 325 bytes long.
