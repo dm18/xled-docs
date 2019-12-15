@@ -42,6 +42,7 @@ Firmware check / update (not required)
 
 After Device Handshake
 ------------------------
+7. http POST Device Reset
 8. http POST mode (off, demo, rt, movie)
 9. UDP LED data stream OR Upload full movie LED effect
 
@@ -296,7 +297,14 @@ Update sequence follows:
 Firmware can be upgraded over the network. I have actually used strings from the firmware to find secret keys, encryption algorithms and some API calls that I haven't seen on the network. It consists of two files. First image format is according to https://github.com/espressif/esptool in version: 1.
 
 
-8 LED effect operating modes
+
+8 Device Reset
+---------
+
+?stops current mode?
+ 
+
+9 LED effect operating modes
 ---------
 Example Send:
 HOST: 192.168.2.11
@@ -345,7 +353,7 @@ Mode movie
 Device will play the api set movie mode file currently stored on device. 
 
 
-9 Upload full movie LED effect
+10 Upload full movie LED effect
 ----------------------------
 
 1. Application calls HTTP API to switch mode to movie
@@ -364,25 +372,57 @@ LED effect is called **movie**. It consists of **frames**. Each frame defines co
 Movie file format is simple sequence of bytes. Three bytes in a row represent intensity of *red*, *green* and *blue* in this order. Each frame is defined just with number of LEDs times three. Frames don't have any separator. Definition of each frame starts from LED closer to LED driver/adapter.
 
 
-9 mode rt
+10 mode rt
 (Real time LED operating mode)
 ----------------------------
 
 1. Application calls HTTP API to switch mode to rt
-2. Then UDP packets are sent to a port 7777 of device. *Each packet represents single frame* that is immediately displayed. See bellow for format of the packets.
-3. if no UDP packet is sent, after 60 seconds rt time out, and the device will revert to mode movie.
+2. client sends UDP packet(s) to device on port 7777. *Each packet represents single frame* that is immediately displayed. See bellow for format of the packets.
+3. if no UDP packet is sent, after 60 seconds rt mode will time out, and the device will revert to mode movie.
 
 
 Real time LED UDP packet format
 -------------------------------
 
-Before packets are sent to a device application needs to login and verify authentication token. See above.
+Before UDP packets are sent to a device, application needs a valid X-Auth-Token.
+See above, steps 1 - 4.
 
-Each UDP has header:
+And the device 'mode' needs to be set to 'rt'
+See above, steps 8. 
 
-* 1 byte *\\x01* (byte with hex representation 0x01)
-* 8 bytes Base 64 decoded authentication token
-* 1 byte number of LED definitions in the frame
+Sending a valid UDP packet requires a valid X-Auth-Token decoded from base64 data into binary data.
+
+An example of that would be
+echo (X_Auth_Token here) | base64 --decode | od -t x1 | head -1 | cut -c8- | tr -d \"[:blank:]\"
+
+example
+if the X-Auth-Token was vWUWUJYWpYA=
+The decoded hex value of the token would be bd6516509616a580
+
+UDP packet format is
+(header)(X-Auth-Token)(frame count)(led values of frame)
+
+Each UDP pack starts with:
+* 1 byte (*\\x01* .byte with hex representation 0x01)
+* 8 bytes (Base 64 decoded of X-Auth-Token into hex)
+* 1 byte (number of LED in frame, I assume always 0 for RT mode, as in 0x00)
+* LED values as a hex. (In the case of RGB that would be rrggbb as in 000000)
+
+Example:
+if the device was 1 LED long
+and the LED was set to black , 000000
+
+AND the X-Auth-Token is vWUWUJYWpYA=
+The decoded hex value of the token would be bd6516509616a580
+
+then the UDP packet would then be
+01 (header)
+bd6516509616a580 (decoded hex version of X_Auth_Token)
+00 (frame / spacer)
+000000 (LED value)
+
+as in a UDP packet sent tot the device on port 7777 would be
+01bd6516509616a58000000000
 
 Then follows body of the frame similarly to movie file format - three bytes for each LED.
 
