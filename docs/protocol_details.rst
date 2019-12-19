@@ -28,7 +28,7 @@ Typical Device Handshake
 ------------------------
 1. UDP Broadcast Discovery
 2. http GET gestalt (get device info)
-3. http POST login (generate authentication_token) 
+3. http POST login (generate authentication_token)
 4. http GET verify login
 
 Check if Wireless Router or Client (not required)
@@ -191,6 +191,8 @@ The Client can chose to verify the response yo determine if it wants to talk to 
 
 4 Verification of challenge-response
 ---------
+Note, if you do not run this step, setting mode will fail. 
+
 
 Example Send:
 HOST: 192.168.2.11
@@ -214,6 +216,7 @@ Example Response:
 
 5 http GET status
 ---------
+
 Example Send:
 HOST: 192.168.2.11
 Port: 80
@@ -326,6 +329,8 @@ Example Response:
 
 9 LED effect operating modes
 ---------
+This GET will return 401 if X-Auth-Token is not valid. (This may happen if a new X-Auth-Token has been created) (it can also happen if the X-Auth-Token has not been verified using the previous step) (probable also happens if X-Auth-Token has expired)
+
 Example Send:
 HOST: 192.168.2.11
 Port: 80
