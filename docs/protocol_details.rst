@@ -25,9 +25,18 @@ API exposes these details:
 
 
 Typical Device Handshake
+-----------
+
+Discovery
 ------------------------
 1. UDP Broadcast Discovery
+
+Device Details
+------------------------
 2. http GET gestalt (get device info)
+
+Handshake
+------------------------
 3. http POST login (generate authentication_token)
 4. http GET verify login
 
@@ -40,19 +49,22 @@ Firmware check / update (not required)
 6. http GET firmware version
 7. http update firmware (if firmware is out of date)
 
-After Device Handshake
+Change Mode
 ------------------------
-7. http POST Device Reset
-8. http POST mode (off, demo, rt, movie)
-9. UDP LED data stream OR Upload full movie LED effect
+8. http POST Device Reset
+9. http POST mode (off, demo, rt, movie)
+10. UDP LED data stream OR Upload full movie LED effect
 
 On Error
 ------------------------
 At anytime the API can return another code other then 1000, if this happens Device Handshake needs to be performed again.
 
 
+Details
+-----------
+
 1 UDP Broadcast Discovery
----------
+------------------------
 Discovery of Twinkly devices on the local network subnet.
 
 1. Application sends UDP broadcast to port 5555 with message **\\x01discover** (first character is byte with hex representation 0x01).
@@ -83,7 +95,7 @@ Example Response BreakDown:
 
 
 2 http GET gestalt (get device info)
----------
+------------------------
 Application uses http POST on port 80 to get device info
 
 Example:
@@ -133,7 +145,7 @@ gestalt provide device hardware info to the client.
 
 
 3 http POST login (generate authentication_token) 
----------
+------------------------
 client uses http POST on port 80 to generate authentication_token
 
 Example Send:
@@ -190,7 +202,7 @@ The Client can chose to verify the response yo determine if it wants to talk to 
 
 
 4 Verification of challenge-response
----------
+------------------------
 Note, if you do not run this step, setting mode will fail. 
 
 
@@ -215,7 +227,7 @@ Example Response:
 
 
 5 http GET status
----------
+------------------------
 
 Example Send:
 HOST: 192.168.2.11
@@ -261,7 +273,7 @@ If you were in AP mode, and wanted to make the client join a specific wireless n
 
 
 6 http GET firmware version
----------
+------------------------
 Example Send:
 HOST: 192.168.2.11
 Port: 80
@@ -290,7 +302,7 @@ I have seen these two versions only so this page describes its behaviour:
 
 
 7 http ?POST? update firmware
----------
+------------------------
 
 Update sequence follows:
 
@@ -305,9 +317,10 @@ Firmware can be upgraded over the network. I have actually used strings from the
 
 
 8 Device Reset
----------
+------------------------
 
-?pauses current mode?
+?resets device?
+Guessing this might be clearing specific settings like Brightness setting
 
 Example Send:
 HOST: 192.168.2.11
@@ -328,7 +341,7 @@ Example Response:
  
 
 9 LED effect operating modes
----------
+------------------------
 This GET will return 401 if X-Auth-Token is not valid. (This may happen if a new X-Auth-Token has been created) (it can also happen if the X-Auth-Token has not been verified using the previous step) (probable also happens if X-Auth-Token has expired)
 
 Example Send:
@@ -379,7 +392,7 @@ Device will play the api set movie mode file currently stored on device.
 
 
 10 Upload full movie LED effect
-----------------------------
+------------------------
 
 1. Application calls HTTP API to switch mode to movie
 2. Application calls API movie/full with file sent as part of the request
@@ -390,7 +403,7 @@ Movie file should not exceed capacity defined in device hardware as movie_capaci
 
 
 Movie file format
------------------
+----------------------------
 
 LED effect is called **movie**. It consists of **frames**. Each frame defines colour of each LED.
 
@@ -399,7 +412,7 @@ Movie file format is simple sequence of bytes. Three bytes in a row represent in
 
 10 mode rt
 (Real time LED operating mode)
-----------------------------
+------------------------
 
 1. Application calls HTTP API to switch mode to rt
 2. client sends UDP packet(s) to device on port 7777. *Each packet represents single frame* that is immediately displayed. See bellow for format of the packets.
